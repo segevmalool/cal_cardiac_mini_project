@@ -1,3 +1,4 @@
+
 """CalCardiac URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
@@ -17,9 +18,10 @@ from django.contrib import admin
 from django.urls import path
 from django.conf.urls import url
 
-from datavis import views
+from datavis import views as datavis_views
 
 urlpatterns = [
-    url(r'^$', views.index, name='index_page'),
+    url(r'dat', datavis_views.get_ecg_signals, name='ecg'),
+    url(r'^$', datavis_views.index, name='index_page'),
     path('admin/', admin.site.urls),
 ]
