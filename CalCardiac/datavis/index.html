@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<script type='text/javascript'>
+  function eat_my_shorts() {
+    $.ajax({
+      url: "http://localhost:8000/dat"      
+    }).done(function (msg) {
+      alert(msg);
+    });
+  }
+  
+</script
+</head>
+
+<body>
+  <section>
+    <p>Hello World</p><br>
+  </section>
+  <input type="button" value="HellFire" onclick="eat_my_shorts()">
+</body>
+
+</html>
