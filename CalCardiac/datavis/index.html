@@ -2,25 +2,81 @@
 <html>
 
 <head>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.js"></script>
 
-<script type='text/javascript'>
-  function eat_my_shorts() {
-    $.ajax({
-      url: "http://localhost:8000/dat"      
-    }).done(function (msg) {
-      alert(msg);
-    });
-  }
-  
-</script
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.18/c3.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.18/c3.css" />
+
+    <script type='text/javascript'>
+        var label_text = {
+            'N': 'Normal Heart Beat',
+            'V': 'Premature Ventricular Contraction',
+            'F': 'Fusion of PVC and Normal Heartbeat',
+            'A': 'Premature Atrial Contraction'
+        };
+
+        function load_data() {
+            // Get data from (local..) server
+            var data = $.ajax({
+                url: "http://localhost:8000/dat"
+            }).done(function (msg) {
+                window.data = JSON.parse(msg);
+            });
+
+            var chart_area = document.getElementById('chart');
+            chart_area.style.left = '30%';
+            chart_area.style.width = '40%';
+
+            var label_area= document.getElementById('chart_label');
+            label_area.style.position = 'relative';
+            label_area.style.left = '30%';
+            label_area.style.width = '40%';
+            label_area.style.textAlign = 'center';
+            label_area.style.backgroundColor = '#00FF00';
+        }
+
+        function display_ecg() {
+            var random_idx = Math.floor(Math.random()*100);
+            var dat = window.data[random_idx];
+            var idx = dat[0];
+            var label = dat[1];
+            var ecg = dat[2];
+
+            var ecg_index = [];
+            for (var i = 0; i < ecg.length; i++) {
+                ecg_index.push(i)
+            }
+
+            var label_area = document.getElementById('chart_label');
+            label_area.textContent = label_text[label];
+
+            var chart = c3.generate({
+                bindto: '#chart',
+                data: {
+                    columns: [
+                        ecg
+                    ]
+                }
+            });
+
+        }
+    </script>
 </head>
 
-<body>
-  <section>
-    <p>Hello World</p><br>
-  </section>
-  <input type="button" value="HellFire" onclick="eat_my_shorts()">
-</body>
+<body onload="load_data()">
+<section id="title">
+    <H1>Cal Cardiac ECG Visualization</H1><br>
+</section>
 
+<section id="chart_controls">
+    <h1>ECG signals measure electrical activity across the heart.</h1>
+    <input type="button" value="View ECG Signal" onclick="display_ecg()">
+</section>
+
+<section id="chart_label"></section>
+
+<section id="chart"></section>
+
+</body>
 </html>
