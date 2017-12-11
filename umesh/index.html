@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<style>
+    body,
+    html {
+        height: 100%;
+        width: 100%;
+    }
+
+    #chart {
+        height: 50%;
+        width: 50%;
+        /* background-color: green; */
+    }
+</style>
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.18/c3.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.18/c3.min.js"></script>
+
+<body>
+    <button id="data1">Data Set 1</button>
+    <button id="data2">Data Set 2</button>
+    <!--
+    <button id="data3">Data Set 3</button>
+    <button id="data4">Data Set 4</button>
+    <button id="data5">Data Set 5</button>
+    -->
+    <div id="chart"></div>
+    <button id="startButton">Start</button>
+    <button id="stopButton">Stop</button>
+</body>
+<script>
+    // Deals with messy headers
+    var headers = { time: "   Elapsed time", MLII: "   MLII", V5: "     V5" }
+    // Set the inital value to 0 so that the data starts at the beginning
+    var currentData = 0;
+    // How many new data points to show on each iteration
+    var sliceAmount = 1;
+    // How many milliseconds between iterations
+    var streamTime = 1;
+    // Storage for the full data set
+    var fullData = {};
+    // Variable holder for the chart to be generated globally
+    var chart;
+    // Initial x value array
+    var x_data = ["x"];
+    // Initial y value array
+    var y_data = ["y"];
+    // Interval variable to allow for stop and start globally
+    var interval;
+    // Variable to keep track of what heartbeat you are looking at
+    var currentlyViewing = ""
+
+    // Import the data
+    var loadData = function (key, path) {
+        d3.tsv(`data/${path}`, function (tempData) {
+            // Check to make sure the messy header fix is working
+            Object.keys(headers).forEach(d => {
+                if (!tempData[0][headers[d]]) {
+                    console.log(headers[d], "ERROR")
+                }
+            })
+
+            // Conver thte data to numbers and fix the keys
+            var newData = tempData.map(d => {
+                return { time: +d[headers.time], MLII: +d[headers.MLII], V5: +d[headers.V5], }
+            })
+
+
+            // Save the fixed dataset
+            fullData[key] = newData;
+
+            // Draw the chart
+            chart = c3.generate({
+                bindto: "#chart",
+                data: {
+                    x: "x",
+                    columns: [
+                        x_data,
+                        y_data,
+                    ]
+                },
+            });
+        })
+    }
+
+    var updateData = function () {
+        // set the interval to start the animation
+        interval = setInterval(function () {
+
+            // Cut the data to only get the new data
+            var dataSlice = fullData[currentlyViewing].slice(currentData, currentData + sliceAmount);
+
+            // Add the new data to the x and y values
+            x_data = x_data.concat(dataSlice.map(d => { return d.time }));
+
+            y_data = y_data.concat(dataSlice.map(d => {
+                return d.MLII
+            }));
+
+            // Load the data to the chart
+            chart.load({
+                columns: [
+                    x_data,
+                    y_data
+                ]
+            });
+
+            // Increment the data so you get the next amount
+            currentData += sliceAmount;
+        }, streamTime);
+    }
+
+    // Stop the stream of data
+    d3.select("#stopButton").on("click", function (d) {
+        if (currentlyViewing !== "") {
+            clearInterval(interval)
+        }
+    });
+
+    // Start the stream of data
+    d3.select("#startButton").on("click", function (d) {
+        if (currentlyViewing !== "") {
+            updateData()
+        }
+    });
+
+    d3.select("#data1").on("click", function (d) {
+        clearInterval(interval);
+        x_data = ["x"];
+        y_data = ["y"];
+        currentlyViewing = "data1";
+        updateData();
+    });
+
+    d3.select("#data2").on("click", function (d) {
+        clearInterval(interval);
+        x_data = ["x"];
+        y_data = ["y"];
+        currentlyViewing = "data2";
+        updateData();
+    });
+
+
+    loadData("data1", "100.txt");
+    loadData("data2", "200.txt");
+    // loadData("data3", "300.txt")
+    // loadData("data4", "400.txt")
+    // loadData("data5", "500.txt")
+
+
+</script>

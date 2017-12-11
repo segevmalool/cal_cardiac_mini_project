@@ -1,0 +1,5 @@
+Open terminal
+CD into the folder where this is located
+Type: python -m http.server 8888
+Open a browser and type localhost:8888
+When finished, ctrl+c in terminal to interrupt server and exit to close it properly
